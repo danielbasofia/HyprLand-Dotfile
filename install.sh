@@ -24,6 +24,14 @@ log()   { echo -e "${GREEN}[+]${NC} $1"; }
 warn()  { echo -e "${YELLOW}[!]${NC} $1"; }
 error() { echo -e "${RED}[x]${NC} $1"; exit 1; }
 
+# Cambiar idioma de teclado a spanish
+if grep -q "kb_layout" "$HYPR_CONF"; then
+	sed -i 's/kb_layout = .*/kb_layout = es/' "$HYPR_CONF"
+	log "Teclado seteado a spanish"
+else
+	warn "no se encontro configuracion para kb_layout"
+fi
+
 # --- FUNCIONES ---
 actualizar_sistema(){
 	log "Actualizando sistema..."
