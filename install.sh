@@ -2,6 +2,21 @@
 set -euo pipefail
 
 HYPR_CONF="$HOME/.config/hypr/hyprland.conf"
+BASH_PROF="$HOME/.bash_profile"
+SHELL_ACTUAL=$(basename "$SHELL")
+LINEA='if [ -z "$WAYLAND_DISPLAY" ] && [ "$XDG_VTNR" -eq 1 ]; then
+	exec start-hyprland
+fi'
+
+
+# Detectar Shell actual
+if [ "$SHELL_ACTUAL" = "zsh" ]; then
+	BASH_PROF="$HOME/.zprofile"
+elif [ "$SHELL_ACTUAL" = "bash" ]; then
+	BASH_PROF="$HOME/.bash_profile"
+else
+	error "Shell no soportado: $SHELL_ACTUAL"
+fi
 
 # --- COLORES ---
 GREEN='\033[0;32m'; YELLOW='\033[1;33m'; RED='\033[0;31m'; NC='\033[0m'
@@ -37,6 +52,25 @@ configurar_zsh(){
 
 instalar_hyprland(){
 	sudo pacman -S hyprland kitty
+
+	# Reemplazar la linea en .bash_profile
+	log "Ubicando bash_profile..."
+	echo $BASH_PROF
+
+	# Crear .bash_profile si no existe
+	if [ ! -f "$BASH_PROF" ]; then
+		touch "BASH_PROF"
+		log ".bash_profile creado"
+	fi
+
+	# Agregar solo si no existe ya
+	if ! grep -q "start-hyprland" "$BASH_PROF"; then
+		echo "$LINEA" >> "$BASH_PROF"
+		log "Hyprland agregado al inicio"
+	else
+		warn "Ya existe la configuracion"
+	fi
+
 }
 
 configuracion_hyprland(){
@@ -54,10 +88,11 @@ configuracion_hyprland(){
 		warn "La linea ya esta comentada o no existe..." 
 	fi
 
+	# Instalar HyprPaper
 	yay -S hyprpaper
 
 	# Recargar HyprLand
-	hyprctl reload
+	# hyprctl reload
 }
 
 # --- MENU PRINCIPAL --
